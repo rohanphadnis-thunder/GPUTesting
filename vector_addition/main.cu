@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cuda.h>
 
-const size_t N = 16000;
+const size_t N = 64000;
 const size_t T = 64;
 
 
