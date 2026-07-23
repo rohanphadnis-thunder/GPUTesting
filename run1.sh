@@ -6,3 +6,5 @@ ls /dev
 find / -type f -name "libthunder.so"
 sudo find / -type f -name "libthunder.so"
 nvidia-smi
+
+find / -name "nvidia-smi"
