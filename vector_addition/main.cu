@@ -1,8 +1,18 @@
+#include <cstdlib>
 #include <iostream>
-#include <cuda.h>
+#include <cuda_runtime.h>
 
 const size_t N = 64000;
 const size_t T = 64;
+
+bool check_cuda(cudaError_t err, const char* call) {
+    if (err == cudaSuccess) {
+        return true;
+    }
+
+    std::cerr << call << " failed: " << cudaGetErrorString(err) << "\n";
+    return false;
+}
 
 
 __global__
@@ -23,22 +33,26 @@ int main() {
         b[i] = rand() % 40;
     }
 
-    int* da; int* db; int* dresult;
-    cudaMalloc(&da, sizeof(int) * N);
-    cudaMalloc(&db, sizeof(int) * N);
-    cudaMalloc(&dresult, sizeof(int) * N);
+    int* da = nullptr;
+    int* db = nullptr;
+    int* dresult = nullptr;
 
-    cudaMemcpy(da, a, sizeof(int) * N, cudaMemcpyHostToDevice);
-    cudaMemcpy(db, b, sizeof(int) * N, cudaMemcpyHostToDevice);
+    if (!check_cuda(cudaMalloc(&da, sizeof(int) * N), "cudaMalloc(da)")) return 1;
+    if (!check_cuda(cudaMalloc(&db, sizeof(int) * N), "cudaMalloc(db)")) return 1;
+    if (!check_cuda(cudaMalloc(&dresult, sizeof(int) * N), "cudaMalloc(dresult)")) return 1;
+
+    if (!check_cuda(cudaMemcpy(da, a, sizeof(int) * N, cudaMemcpyHostToDevice), "cudaMemcpy(da)")) return 1;
+    if (!check_cuda(cudaMemcpy(db, b, sizeof(int) * N, cudaMemcpyHostToDevice), "cudaMemcpy(db)")) return 1;
 
     vector_add<<<1, T>>>(da, db, dresult);
+    if (!check_cuda(cudaGetLastError(), "vector_add launch")) return 1;
+    if (!check_cuda(cudaDeviceSynchronize(), "cudaDeviceSynchronize")) return 1;
 
-    cudaDeviceSynchronize();
+    if (!check_cuda(cudaMemcpy(result, dresult, sizeof(int) * N, cudaMemcpyDeviceToHost), "cudaMemcpy(result)")) return 1;
 
-    cudaMemcpy(result, dresult, sizeof(int) * N, cudaMemcpyDeviceToHost);
-    cudaFree(da);
-    cudaFree(db);
-    cudaFree(dresult);
+    if (!check_cuda(cudaFree(da), "cudaFree(da)")) return 1;
+    if (!check_cuda(cudaFree(db), "cudaFree(db)")) return 1;
+    if (!check_cuda(cudaFree(dresult), "cudaFree(dresult)")) return 1;
 
     bool correct = true;
     for (size_t i = 0; i < N && correct; ++i) {
