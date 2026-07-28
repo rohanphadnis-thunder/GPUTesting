@@ -1,6 +1,6 @@
 set -euo pipefail
 
-MODEL="Qwen/Qwen2.5-Coder-1.5B-Instruct"
+MODEL="Qwen/Qwen2.5-1.5B-Instruct"
 HOST="127.0.0.1"
 PORT="8000"
 READY_TIMEOUT_SECONDS="${READY_TIMEOUT_SECONDS:-600}"
@@ -44,7 +44,7 @@ RESPONSE_FILE="$(mktemp)"
 curl -fsS "http://${HOST}:${PORT}/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -d '{
-        "model": "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
         "messages": [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "Which is the largest planet in the solar system?"}
