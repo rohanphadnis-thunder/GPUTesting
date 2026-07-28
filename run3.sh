@@ -7,7 +7,7 @@ READY_TIMEOUT_SECONDS="${READY_TIMEOUT_SECONDS:-600}"
 
 uv venv
 source .venv/bin/activate
-uv pip install vllm --torch-backend auto
+uv pip install vllm --torch-backend=cu129
 
 cleanup() {
     if [[ -n "${VLLM_PID:-}" ]] && kill -0 "${VLLM_PID}" 2>/dev/null; then
